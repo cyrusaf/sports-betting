@@ -65,6 +65,9 @@ teams.append("Stephen Curry,Nik Stauskas,Giannis Antetokounmpo,Brook Lopez,Brand
 teams.append("Stephen Curry,Nik Stauskas,Kawhi Leonard,Tyson Chandler,Brandon Knight,Rodney Hood,Matthew Dellavedova,Kevin Love".split(","))
 teams.append("Stephen Curry,Nik Stauskas,Kawhi Leonard,Jonas Valanciunas,C.J. McCollum,Rodney Hood,Matthew Dellavedova,Kevin Love".split(","))
 teams.append("Stephen Curry,Nik Stauskas,Kawhi Leonard,Tyson Chandler,Isaiah Thomas,Rodney Hood,Matthew Dellavedova,Greg Monroe".split(","))
+teams.append("Stephen Curry,Nik Stauskas,Kawhi Leonard,Jonas Valanciunas,Isaiah Thomas,Evan Fournier,Matthew Dellavedova,Greg Monroe".split(","))
+teams.append("Stephen Curry,Nik Stauskas,Kawhi Leonard,Jonas Valanciunas,Brandon Knight,Amir Johnson,Matthew Dellavedova,Greg Monroe".split(","))
+
 
 ps = []
 goals = [270, 275, 280, 285, 290, 300]
@@ -73,8 +76,8 @@ for team in teams:
 	std = 0.0
 	n = 0
 	for name in team:
-		player = loadPlayer(name)
-		DK = calcDK(player)
+		player = self.loadPlayer(name)
+		DK = self.calcDK(player)
 		n += len(DK)
 		total_pts += numpy.mean(DK)
 		std += numpy.std(DK)**2
