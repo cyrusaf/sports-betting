@@ -3,10 +3,33 @@ import os
 import re
 import urllib2
 import json
+import requests
 
 class Scraper:
 	def __init__(self):
 		pass
+
+	def getUpcomingContests(self):
+		url = "https://www.draftkings.com/lineup/getupcomingcontestinfo"
+		r = requests.post(url)
+		data = json.loads(r.text)
+		return data
+
+	def getPickablePlayers(self):
+		contests = self.getUpcomingContests()
+		contest_id = None
+		for contest in contests:
+			if contest['Sport'] == 'NBA' and contest['ContestStartTimeSuffix'] == ' (All Day)':
+				contest_id = contest['DraftGroupId']
+				break
+
+		if contest_id is None: raise Exception("Could not find contest!")
+
+		url = "https://www.draftkings.com/lineup/getavailableplayers?draftGroupId=%s" % contest_id
+		json_data = urllib2.urlopen(url).read()
+		data = json.loads(json_data)['playerList']
+		data = [{'name': datum['fn'] + " " + datum['ln'], 'salary': datum['s'], 'pos': datum['pn']} for datum in data]
+		return data
 
 
 	def getPlayerIds(self):

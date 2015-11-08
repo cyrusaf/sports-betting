@@ -10,3 +10,6 @@ for tbl in reversed(Base.metadata.sorted_tables):
 		print "Couldn't drop table %s" % tbl
 
 Base.metadata.create_all(engine)
+
+model = Model()
+model.fetchPlayers()

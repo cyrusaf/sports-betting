@@ -12,12 +12,30 @@ from models import Gamelog
 
 class Model:
 
+	def fetchPickablePlayers(self):
+		for player in session.query(Player):
+			player.pickable = False
+
+		scraper = Scraper()
+		pickable_players = scraper.getPickablePlayers()
+		for i, obj in enumerate(pickable_players):
+			player = Player.fromName(obj['name'])
+			print player.name + " (%s/%s)" % (i, len(pickable_players))
+			player.pickable = True
+			player.salary = obj['salary']
+			player.pos = obj['pos']
+			self.fetchGamelogs(player)
+
+		session.commit()
+
+
 	def fetchPlayers(self):
 		scraper = Scraper()
 		players = scraper.getPlayerIds()
 
 		instances = []
 		for player in players:
+			if player['id'] == 299: continue
 			player_inst = Player(name=player['name'], id=player['id'])
 			instances.append(player_inst)
 
@@ -103,14 +121,14 @@ class Model:
 
 	def testTeam(self, team):
 		ps = []
-		goals = [270, 275, 280, 285, 290, 300]
+		goals = [270]
 
 		total_pts = 0.0
 		std = 0.0
 		n = 0
-		for name in team:
-			player, salary = self.loadPlayer(name)
-			DK = self.calcDK(player)
+		for player in team:
+			DK = [log.DK for log in player.gamelogs]
+			if len(DK) == 0: return [0,0,0]
 			n += len(DK)
 			total_pts += numpy.mean(DK)
 			std += numpy.std(DK)**2
@@ -126,6 +144,4 @@ class Model:
 		header = ['mean', 'std']
 		for goal in goals:
 			header.append(goal)
-		print ""
-		print team
-		print tabulate([ps], headers=header)
+		return ps
