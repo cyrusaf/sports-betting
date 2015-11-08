@@ -1,3 +1,4 @@
+from ..models import Player
 from services import Scraper
 import sys
 
@@ -9,8 +10,7 @@ print "Scraping for %s players..." % len(players)
 
 scraper = Scraper()
 for player in players:
-	try:
-		scraper.downloadStats(player)
-	except Exception:
-		print "Couldn't find stats on %s!" % player
-scraper.quit()
+	#try:
+	scraper.downloadStats(player)
+	#except Exception:
+	#	print "Couldn't find stats on %s!" % player

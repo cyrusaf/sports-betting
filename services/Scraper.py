@@ -1,59 +1,67 @@
-from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
 import csv
 import os
+import re
+import urllib2
+import json
 
 class Scraper:
 	def __init__(self):
-		self.driver = webdriver.Chrome()
-
-	def downloadStats(self, name):
-		# Navigate to nba search page
-		self.driver.get("http://www.nba.com/search/?text=%s" % name.replace(' ', '+'))
-
-		# Click on player search head
-		player_page_link = self.driver.find_element_by_css_selector('.nbaPlayerSearchHead a')
-		name = player_page_link.text.split("-")[0].strip()
-		print("Downloading stats for %s..." % name)
-		player_page_link.click()
-
-		# Navigate to logs link
-		player_logs_link = self.driver.find_element_by_css_selector('#tab-logs')
-		url = player_logs_link.get_attribute('href')
-		self.driver.get(url)
+		pass
 
 
-		# Find rows in table
-		rows = self.driver.find_elements_by_css_selector('table tr')
+	def getPlayerIds(self):
+		url = "http://stats.nba.com/stats/commonallplayers?IsOnlyCurrentSeason=0&LeagueID=00&Season=2015-16"
+		json_data = urllib2.urlopen(url).read()
+		data = json.loads(json_data)
 
-		# Create header and data rows
-		headers = ['Player']
-		data = []
+		headers = data['resultSets'][0]['headers']
+		rows    = data['resultSets'][0]['rowSet']
 
-		# Loop through each row
-		for rr, row in enumerate(rows):
-
-			# If header row
-			if rr == 0:
-				cols = row.find_elements_by_css_selector('th')
-				for col in cols:
-					headers.append(col.text.encode("ascii"))
-
-			# If data rows
+		players = []
+		for row in rows:
+			player = {}
+			player['id']   = row[0]
+			names = [name.strip() for name in row[1].split(",")]
+			if len(names) > 1:
+				player['name'] = names[1] + " " + names[0]
 			else:
-				cols = row.find_elements_by_css_selector('td')
-				data_line = [name.encode("ascii")]
-				for col in cols:
-					data_line.append(col.text.encode("ascii"))
-				data.append(data_line)
+				player['name'] = row[1]
+			players.append(player)
 
-		# Write data to csv file
-		f = open("data/%s.csv" % name, "wb")
-		writer = csv.writer(f)
-		writer.writerow(headers)
-		for datum in data:
-			writer.writerow(datum)
-		f.close()
+		return players
 
-	def quit(self):
-		self.driver.quit()
+	def getGamelogs(self, id):
+		url = "http://stats.nba.com/stats/playergamelog?LeagueID=00&PlayerID=%s&Season=2015-16&SeasonType=Regular+Season" % id
+		json_data = urllib2.urlopen(url).read()
+		data = json.loads(json_data)
+
+		headers = data['resultSets'][0]['headers']
+		rows    = data['resultSets'][0]['rowSet']
+
+		logs = []
+		for row in rows:
+			log = {}
+			log['game_id'] = row[2]
+			log['MIN'] = row[6]
+			log['FGM'] = row[7]
+			log['FGA'] = row[8]
+			log['FG_PCT'] = row[9]
+			log['FG3M'] = row[10]
+			log['FG3A'] = row[11]
+			log['FG3_PCT'] = row[12]
+			log['FTM'] = row[13]
+			log['FTA'] = row[14]
+			log['FT_PCT'] = row[15]
+			log['OREB'] = row[16]
+			log['DREB'] = row[17]
+			log['REB'] = row[18]
+			log['AST'] = row[19]
+			log['STL'] = row[20]
+			log['BLK'] = row[21]
+			log['TOV'] = row[22]
+			log['PF'] = row[23]
+			log['PTS'] = row[24]
+			log['spread'] = row[21]
+			logs.append(log)
+
+		return logs

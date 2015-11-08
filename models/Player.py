@@ -1,21 +1,14 @@
-from db import db
+from sqlalchemy import Column, Integer, String
+from db import Base, relationship
 
-class Player:
-	def __init__(self, name):
-		self.name = name
+class Player(Base):
+	__tablename__ = 'players'
 
-		# Check if name exists in db
-		player = db.players.find({"name": name})
-		if player.count != 0:
-			self.name = player[0].name
-
-		else:
-			# If not, run update
-			self.update()
-
-	def update(self):
-		# Fetch info from web
-		# Insert/update in collection
+	id = Column(Integer, primary_key=True)
+	name = Column(String(255))
+	gamelogs = relationship('Gamelog', backref='player')
 			
-		
+	def __repr__(self):
+		return "<Player(name='%s', id='%s')>" % (self.name, self.id)
+	
 		
